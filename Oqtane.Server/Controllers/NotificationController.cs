@@ -8,10 +8,6 @@ using Oqtane.Infrastructure;
 using Oqtane.Repository;
 using Oqtane.Security;
 using System.Net;
-using System.Reflection.Metadata;
-using Microsoft.Extensions.Localization;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using System.Linq;
 
 namespace Oqtane.Controllers
 {
@@ -187,7 +183,7 @@ namespace Oqtane.Controllers
         {
             if (ModelState.IsValid && notification.SiteId == _alias.SiteId && notification.NotificationId == id && _notifications.GetNotification(notification.NotificationId, false) != null && (IsAuthorized(notification.FromUserId) || IsAuthorized(notification.ToUserId)))
             {
-                if (!User.IsInRole(RoleNames.Admin))
+                if (!User.IsInRole(RoleNames.Admin) && notification.FromUserId != null)
                 {
                     // content must be HTML encoded for non-admins to prevent HTML injection
                     notification.Subject = WebUtility.HtmlEncode(notification.Subject);
@@ -227,7 +223,7 @@ namespace Oqtane.Controllers
 
         private bool IsAuthorized(int? userid)
         {
-            bool authorized = true;
+            bool authorized = false;
             if (userid != null)
             {
                 authorized = (_userPermissions.GetUser(User).UserId == userid);
